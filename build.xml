@@ -1,0 +1,81 @@
+<project name="stock" default="copy" basedir=".">
+
+    <property file="build.properties"/>
+
+    
+    <target name="init">
+        <tstamp/>
+    </target>
+
+    <target name="clean" description="Deletes the Web Application's--$(app.name) war directory and war file">
+        <echo message="Deleting ${app.name}'s war directory and war file ..."/>
+        <delete dir="${basedir}/war"/>
+        <delete file="${basedir}/${app.name}.war"/>
+		 <delete file="${tomcat.home}/webapps/${app.name}.war"/>
+		 <delete file="${tomcat.home}/webapps/${app.name}"/>
+    </target>
+
+    <target name="prepare" description="Creates the Web Application's war directory" depends="init">
+        <echo message="Creating ${app.name}'s war directory ..."/>
+        <mkdir dir="${basedir}/war"/>
+        <mkdir dir="${basedir}/war/WEB-INF"/>
+        <mkdir dir="${basedir}/war/WEB-INF/classes"/>
+        
+    </target>
+
+	
+
+    <target name="build" description="Builds the Web Application" depends="prepare">
+        <echo message="Building ${app.name} ..."/>
+        <javac srcdir="${basedir}/src" destdir="${basedir}/war/WEB-INF/classes" includeantruntime="false">
+            <include name="*.java"/>
+            
+        </javac>
+		
+		        <copy todir="${basedir}/war/WEB-INF">
+            <fileset dir="${basedir}/web/WEB-INF">
+                <include name="web.xml"/>
+            </fileset>
+        </copy>
+		<copy todir="${basedir}/war/WEB-INF/lib">
+            <fileset dir="${basedir}/web/WEB-INF/lib">
+                <include name="*"/>
+            </fileset>
+        </copy>
+		<copy todir="${basedir}/war/META-INF">
+            <fileset dir="${basedir}/web/META-INF">
+                <include name="*"/>
+            </fileset>
+        </copy>
+        <copy todir="${basedir}/war">
+            <fileset dir="${basedir}/web">
+			     <include name="**/*.html"/>
+                <include name="**/*.jsp"/>
+                <include name="**/*.txt"/>
+                <include name="**/*.zip"/>
+                <include name="**/*.sit"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.jpg"/>
+                <include name="**/*.properties"/>
+				 <include name="**/*.bat"/>
+				  <include name="**/*.number"/>
+            </fileset>
+        </copy>
+   </target>
+
+    <target name="package" description="Packages the Web Application's web archive file" depends="build">
+        <echo message="Packaging ${app.name}'s war file ..."/>
+        <delete file="${basedir}/${app.name}.war"/>
+        <jar jarfile="${basedir}/${app.name}.war">
+            <fileset dir="${basedir}/war" includes="**"/>
+        </jar>
+    </target>
+	<target name="num" depends="package">
+	<buildnumber file="${basedir}/web/mybuild.number"/>
+	</target>
+
+<target name="copy" description="copy war file to tomcat webapps" depends="num">
+    <copyfile src="${basedir}/${app.name}.war" dest="${tomcat.home}/webapps/${app.name}.war"/>
+	 	</target>
+ 
+</project>
